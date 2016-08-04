@@ -1,0 +1,54 @@
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+*.d
+
+# Precompiled Headers
+*.gch
+*.pch
+*.pcm
+*.png
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Misc.
+*~
+*#
+*.root
+*.log
+*.pdf
+*.txt
+!txt/variables/*
+!txt/colors.txt
+!txt/plot_styles.txt
+*.#*
+sftp-config.json
+.DS_Store
+
+# LaTeX
+*.tex
+*.aux
+
+# Auto-generated files
+inc/baby.hpp
+inc/baby_*.hpp
+src/baby.cpp
+src/baby_*.cpp
