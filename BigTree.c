@@ -5,6 +5,7 @@
 #include "TLorentzVector.h"
 #include "TClonesArray.h"
 #include <iostream>
+#include <TVector.h>
 #include <TH2D.h>
 #include <stdio.h>
 #include <TObject.h>
@@ -15,13 +16,18 @@
 #pragma link C++ class vector<TLorentZVector>+;
 #endif
 #include "TROOT.h"
+
+double deltaR(double eta1, double phi1, double eta2, double phi2){
+  return hypot(TVector2::Phi_mpi_pi(phi2-phi1), eta2-eta1);
+}
+
 void TreeMaker(TString filename) {
   gROOT->ProcessLine("#include <vector>");
-//  TFile* file = TFile::Open(Form("root://cmseos.fnal.gov//store/user/lpcsusyhad/SusyRA2Analysis2015/Skims/Run2ProductionV9/tree_signal/%s", filename.Data()));
-  TFile* file = TFile::Open("Total.root");
-  TTree* Tree = (TTree*)file->Get("TreeMaker2/PreSelection");
-  //TFile out(Form("/eos/uscms/store/user/adorsett/HHbbbb/BackTrees/%s",filename.Data()), "RECREATE");
-  TFile out("Signal.root","RECREATE");
+  TFile* file = TFile::Open(Form("root://cmseos.fnal.gov//store/user/lpcsusyhad/SusyRA2Analysis2015/Skims/Run2ProductionV9/tree_signal/%s", filename.Data()));
+//  TFile* file = TFile::Open("Total.root");
+  TTree* Tree = (TTree*)file->Get("tree");
+  TFile out(Form("/eos/uscms/store/user/adorsett/HHbbbb/BackTrees/%s",filename.Data()), "RECREATE");
+ // TFile out("Signal.root","RECREATE");
   out.cd();
   Tree->SetBranchStatus("*",0);
   Tree->SetBranchStatus("RunNum",1);
@@ -224,24 +230,24 @@ void TreeMaker(TString filename) {
 		DeltaMjj = abs(pair1.M() - pair2.M());
 		config = 2; }
 	if(config == 0) {
-		r1 = sqrt(pow(Jets->at(jets.at(0)).Eta() - Jets->at(jets.at(1)).Eta(),2) + pow(Jets->at(jets.at(0)).Phi() - Jets->at(jets.at(1)).Phi(),2));
-		r2 = sqrt(pow(Jets->at(jets.at(2)).Eta() - Jets->at(jets.at(3)).Eta(),2) + pow(Jets->at(jets.at(2)).Phi() - Jets->at(jets.at(3)).Phi(),2));
+		r1 = deltaR(Jets->at(jets.at(0)).Eta(), Jets->at(jets.at(0)).Phi(), Jets->at(jets.at(1)).Eta(), Jets->at(jets.at(1)).Phi());
+		r2 = deltaR(Jets->at(jets.at(2)).Eta(), Jets->at(jets.at(2)).Phi(), Jets->at(jets.at(3)).Eta(), Jets->at(jets.at(3)).Phi());
 		if(r1>r2) {Rmax = r1;}
 		else{Rmax = r2;} 
 		pair1 = Jets->at(jets.at(0)) + Jets->at(jets.at(1));
         	pair2 = Jets->at(jets.at(2)) + Jets->at(jets.at(3));
 		Mjj = (pair1.M() + pair2.M())/2; }
 	if(config == 1) {
-                r1 = sqrt(pow(Jets->at(jets.at(0)).Eta() - Jets->at(jets.at(2)).Eta(),2) + pow(Jets->at(jets.at(0)).Phi() - Jets->at(jets.at(2)).Phi(),2));
-                r2 = sqrt(pow(Jets->at(jets.at(1)).Eta() - Jets->at(jets.at(3)).Eta(),2) + pow(Jets->at(jets.at(1)).Phi() - Jets->at(jets.at(3)).Phi(),2));
+		r1 = deltaR(Jets->at(jets.at(0)).Eta(), Jets->at(jets.at(0)).Phi(), Jets->at(jets.at(2)).Eta(), Jets->at(jets.at(2)).Phi());
+                r2 = deltaR(Jets->at(jets.at(1)).Eta(), Jets->at(jets.at(1)).Phi(), Jets->at(jets.at(3)).Eta(), Jets->at(jets.at(3)).Phi());
                 if(r1>r2) {Rmax = r1;}
                 else{Rmax = r2;}
                 pair1 = Jets->at(jets.at(0)) + Jets->at(jets.at(2));
                 pair2 = Jets->at(jets.at(1)) + Jets->at(jets.at(3));
                 Mjj = (pair1.M() + pair2.M())/2; }
 	if(config == 2) {
-                r1 = sqrt(pow(Jets->at(jets.at(0)).Eta() - Jets->at(jets.at(3)).Eta(),2) + pow(Jets->at(jets.at(0)).Phi() - Jets->at(jets.at(3)).Phi(),2));
-                r2 = sqrt(pow(Jets->at(jets.at(1)).Eta() - Jets->at(jets.at(2)).Eta(),2) + pow(Jets->at(jets.at(1)).Phi() - Jets->at(jets.at(2)).Phi(),2));
+		r1 = deltaR(Jets->at(jets.at(0)).Eta(), Jets->at(jets.at(0)).Phi(), Jets->at(jets.at(3)).Eta(), Jets->at(jets.at(3)).Phi());
+                r2 = deltaR(Jets->at(jets.at(1)).Eta(), Jets->at(jets.at(1)).Phi(), Jets->at(jets.at(2)).Eta(), Jets->at(jets.at(2)).Phi());
                 if(r1>r2) {Rmax = r1;}
                 else{Rmax = r2;}
                 pair1 = Jets->at(jets.at(0)) + Jets->at(jets.at(3));
@@ -263,8 +269,8 @@ void TreeMaker(TString filename) {
 
 void BigTree(){
 
-  TreeMaker("WORDS");
-/*
+//  TreeMaker("WORDS");
+
   TreeMaker("tree_ZZTo2Q2Nu.root");
   TreeMaker("tree_ZZTo2L2Q.root");
   TreeMaker("tree_ZJetsToNuNu_HT-100to200.root");
@@ -316,7 +322,7 @@ void BigTree(){
   TreeMaker("tree_DYJetsToLL_M-50_HT-400to600.root");
   TreeMaker("tree_DYJetsToLL_M-50_HT-200to400.root");
   TreeMaker("tree_DYJetsToLL_M-50_HT-100to200.root");
-*/
+
   return; }
 
 

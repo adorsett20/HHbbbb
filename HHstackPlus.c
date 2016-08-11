@@ -99,16 +99,22 @@ void Plot(TString var, TCut OtherCuts, TCut trig, TCut weight, TH1D* temp, TStri
   TH1D * hmc = (TH1D*)temp->Clone("mc"); //Used to keep track of stack values
 //Additional Cuts
   TCut selection(OtherCuts);
-  TCut tempo("MHT > 200 && CSV2 > .89 && NJets >= 4 && @Muons.size()+@Electrons.size()==0 && isoMuonTracks+isoElectronTracks+isoPionTracks==0 && DeltaPhi1>0.5&&DeltaPhi2>0.5&&DeltaPhi3>0.3&&DeltaPhi4>0.3 && NJets <= 5 && Rmax < 2.2 && Rmax > 0");
+  TCut tempo("@GenEls.size()+@GenMus.size() == 0 && MHT > 200 && CSV2 > .898 && NJets <= 5 && DeltaPhi1>0.5&&DeltaPhi2>0.5&&DeltaPhi3>0.3&&DeltaPhi4>0.3 && isoMuonTracks+isoElectronTracks+isoPionTracks==0 && NJets >=4 && Rmax < 2.2");
+//4b Cuts
+  TCut sigB("CSV2 > .97 && CSV3 > .89 && CSV4 > .605");
+  TCut backB("CSV2 > .935 && CSV3 > .8 && CSV4 > .460");
+//2/3b Cuts
+  //TCut sigB("CSV2 > .97 && CSV4 < .605");
+  //TCut backB("CSV2 > .935 && CSV4 < .460");
 //Fill histograms
-  ttbar->Project("ttbar", var, selection*weight);
-  ttbar_lep->Project("+ttbar", var, (selection+"madHT<600")*weight);
-  qcd->Project("qcd", var, (selection)*weight);
-  ttbar_had->Project("+qcd", var, (selection+"madHT<600&&@GenEls.size()+@GenMus.size()+@GenTaus.size()==0")*weight);
-  znn->Project("znn", var, selection*weight);
-  wjets->Project("wjets", var, selection*weight);
-  other->Project("other", var, selection*weight);
-  data->Project("data",var,tempo*"30.*88.7325/28405.*(.582)*(.582)");
+  ttbar->Project("ttbar", var, (selection+backB)*weight);
+  ttbar_lep->Project("+ttbar", var, ((selection+backB)+"madHT<600")*weight);
+  qcd->Project("qcd", var, ((selection+backB))*weight);
+  ttbar_had->Project("+qcd", var, ((selection+backB)+"madHT<600&&@GenEls.size()+@GenMus.size()+@GenTaus.size()==0")*weight);
+  znn->Project("znn", var, (selection+backB)*weight);
+  wjets->Project("wjets", var, (selection+backB)*weight);
+  other->Project("other", var, (selection+backB)*weight);
+  data->Project("data",var,(selection+sigB)*"30.*88.7325/28405.*(.582)*(.582)");
 //Fix overflow by adding to last bin in hist
   bool addOverflow(true);
   Double_t e_overflow(0.), i_overflow(0.);
@@ -353,7 +359,7 @@ void HHstackPlus() {
 
   TCut skim("MHT > 250 && HT > 250 && DeltaPhi1>0.5&&DeltaPhi2>0.5&&DeltaPhi3>0.3&&DeltaPhi4>0.3 && @Muons.size()+@Electrons.size()==0 && isoMuonTracks+isoElectronTracks+isoPionTracks==0");
  
-  TCut NJ20("NJets20 == 4 || NJets20 == 5");
+  TCut NJet("NJets == 4 || NJets == 5");
   TCut DeltaM("DeltaMjj < 40");
   TCut AverageM("AverageMjj > 100 && AverageMjj < 140");
   TCut Rmax("Rmax < 2.2");
@@ -367,28 +373,50 @@ void HHstackPlus() {
   TCut qcd_cleaning = "MET/CaloMET<5"; 
 //Setup Histograms for kinematic distributions
   Double_t mht_bins[8] = {300, 350, 400, 500, 600, 750, 1000, 1500};
-  TH1D* hMHT = new TH1D("hMHT", ";H_{T}^{miss} [GeV]", 30, 0, 600);
-  TH1D* hHT = new TH1D("hHT", ";H_{T} [GeV]", 35, 0, 1400);
-  TH1D* hNJets = new TH1D("hNJets", ";N_{jet} (p_{T} > 50 GeV)", 11, 3.5, 13.5);
+  TH1D* hMHT = new TH1D("hMHT", ";E_{T}^{miss} [GeV]", 25, 250, 700);
+  TH1D* hHT = new TH1D("hHT", ";H_{T} [GeV]", 28, 0, 1400);
+  TH1D* hNJets = new TH1D("hNJets", ";N_{jet} (p_{T} > 30 GeV)", 10, 3.5, 13.5);
   TH1D* hBTags = new TH1D("hBTags", ";N_{b-jet} (p_{T} > 30 GeV)", 5, -0.5, 4.5);
   TH1D* res = new TH1D("res", ";H_{T}^{miss}/#sqrt{H_{T}}", 18, 0,36);
   TH1D* AK8 = new TH1D("AK8", ";M_(Jet)", 30,0,300);
-  TH1D* Rma = new TH1D("Rma", ";R_{Max}", 40,0,4);
-  TH1D* Mav = new TH1D("Mav", ";<M_{jj}> [GeV]", 50, 0, 250);
-  TH1D* Dmass = new TH1D("Dmass", ";#Deltam_{jj} [GeV]", 40, 0, 160);
+  TH1D* Rma = new TH1D("Rma", ";R_{Max}", 20,0,4);
+  TH1D* Mav = new TH1D("Mav", ";<M_{jj}> [GeV]", 25, 0, 250);
+  TH1D* Dmass = new TH1D("Dmass", ";#Deltam_{jj} [GeV]", 32, 0, 160);
+  TH1D* Dphi2 = new TH1D("Dphi2", ";#Delta#phi_{2}", 32, 0, 3.2);
+  TH1D* Dphi3 = new TH1D("Dphi3", ";#Delta#phi_{3}", 32, 0, 3.2);
+  TH1D* Dphi4 = new TH1D("Dphi4", ";#Delta#phi_{4}", 32, 0, 3.2);
+  TH1D* Jet1PT = new TH1D("Jet1PT", ";Jet 1 p_{T} [GeV]", 30, 0, 600);
+  TH1D* Jet2PT = new TH1D("Jet2PT", ";Jet 2 p_{T} [GeV]", 35, 0, 350);
+  TH1D* Jet3PT = new TH1D("Jet3PT", ";Jet 3 p_{T} [GeV]", 25, 0, 250);
 //Make Plots
 
-  Plot("MHT","@Muons.size()+@Electrons.size()==0 && isoMuonTracks+isoElectronTracks+isoPionTracks==0 && MHT>200 && CSV2 > .89 && NJets >= 4 && NJets <=5"+dPhi, bad_lumi_filter, "Weight*30000", hMHT,
+  Plot("Jets[0].Pt()","MET > 250"+ZL+dPhi+NJet+AverageM+DeltaM+Rmax, bad_lumi_filter, "Weight*30000", Jet1PT,
            "tree_signal", "tree_signalUnblind",
            "plotData:plotLog",
-           "New");
-  
-  Plot("MHT","@Muons.size()+@Electrons.size()==0 && isoMuonTracks+isoElectronTracks+isoPionTracks==0", bad_lumi_filter, "Weight*30000", hMHT,
-           "tree_signal", "tree_signalUnblind",
-           "plotData:plotLog",
-           "New");
+           "New-Jet1PT-4b");
 
-/*  Plot("DeltaMjj",baseline+dPhi+ZL+NJ20+Rmax+AverageM+Bcheck, bad_lumi_filter, "Weight*30000", Dmass,
+  Plot("Jets[1].Pt()","MET > 250"+ZL+dPhi+NJet+AverageM+DeltaM+Rmax, bad_lumi_filter, "Weight*30000", Jet2PT,
+           "tree_signal", "tree_signalUnblind",
+           "plotData:plotLog",
+           "New-Jet2PT-4b");
+
+  Plot("Jets[2].Pt()","MET > 250"+ZL+dPhi+NJet+AverageM+DeltaM+Rmax, bad_lumi_filter, "Weight*30000", Jet3PT,
+           "tree_signal", "tree_signalUnblind",
+           "plotData:plotLog",
+           "New-Jet3PT-4b");
+
+/* 
+  Plot("Rmax","MET > 250"+Rmax+AverageM+DeltaM+NJet, bad_lumi_filter, "Weight*30000", Rma,
+           "tree_signal", "tree_signalUnblind",
+           "plotData:plotLog",
+           "New-DeltaPhi3-4b");
+
+  Plot("Rmax","MET > 250"+Rmax+DeltaM+AverageM+NJet, bad_lumi_filter, "Weight*30000", Rma,
+           "tree_signal", "tree_signalUnblind",
+           "plotData:plotLog",
+           "New-DeltaPhi4-4b");
+
+  Plot("DeltaMjj",baseline+dPhi+ZL+NJ20+Rmax+AverageM+Bcheck, bad_lumi_filter, "Weight*30000", Dmass,
            "tree_signal", "tree_signalUnblind",
            "plotData:plotLog",
            "New-DeltaM-4b");
