@@ -100,9 +100,12 @@ void Plot(TString var, TCut OtherCuts, TCut trig, TCut weight, TH1D* temp, TStri
 //Additional Cuts
   TCut selection(OtherCuts);
   TCut tempo("@GenEls.size()+@GenMus.size() == 0 && MHT > 200 && CSV2 > .898 && NJets <= 5 && DeltaPhi1>0.5&&DeltaPhi2>0.5&&DeltaPhi3>0.3&&DeltaPhi4>0.3 && isoMuonTracks+isoElectronTracks+isoPionTracks==0 && NJets >=4 && Rmax < 2.2");
+//No B Cuts
+  TCut sigB("");
+  TCut backB("");
 //4b Cuts
-  TCut sigB("CSV2 > .97 && CSV3 > .89 && CSV4 > .605");
-  TCut backB("CSV2 > .935 && CSV3 > .8 && CSV4 > .460");
+  //TCut sigB("CSV2 > .97 && CSV3 > .89 && CSV4 > .605");
+  //TCut backB("CSV2 > .935 && CSV3 > .8 && CSV4 > .460");
 //2/3b Cuts
   //TCut sigB("CSV2 > .97 && CSV4 < .605");
   //TCut backB("CSV2 > .935 && CSV4 < .460");
@@ -388,22 +391,25 @@ void HHstackPlus() {
   TH1D* Jet1PT = new TH1D("Jet1PT", ";Jet 1 p_{T} [GeV]", 30, 0, 600);
   TH1D* Jet2PT = new TH1D("Jet2PT", ";Jet 2 p_{T} [GeV]", 35, 0, 350);
   TH1D* Jet3PT = new TH1D("Jet3PT", ";Jet 3 p_{T} [GeV]", 25, 0, 250);
+  TH1D* BL = new TH1D("BL", ";N_{b-jet}^{L}", 7, -.5, 6.5);
+  TH1D* BM = new TH1D("BM", ";N_{b-jet}^{M}", 7, -.5, 6.5);
+  TH1D* BT = new TH1D("BT", ";N_{b-jet}^{T}", 7, -.5, 6.5);
 //Make Plots
 
-  Plot("Jets[0].Pt()","MET > 250"+ZL+dPhi+NJet+AverageM+DeltaM+Rmax, bad_lumi_filter, "Weight*30000", Jet1PT,
+  Plot("Bloose","BLoose >= 2 && MET > 250"+dPhi+NJet+AverageM+DeltaM+Rmax, bad_lumi_filter, "Weight*30000", BL,
            "tree_signal", "tree_signalUnblind",
            "plotData:plotLog",
-           "New-Jet1PT-4b");
+           "New-Bloose");
 
-  Plot("Jets[1].Pt()","MET > 250"+ZL+dPhi+NJet+AverageM+DeltaM+Rmax, bad_lumi_filter, "Weight*30000", Jet2PT,
+  Plot("Bmedium","BLoose >= 2 && MET > 250"+dPhi+NJet+AverageM+DeltaM+Rmax, bad_lumi_filter, "Weight*30000", BM,
            "tree_signal", "tree_signalUnblind",
            "plotData:plotLog",
-           "New-Jet2PT-4b");
+           "New-Bmedium");
 
-  Plot("Jets[2].Pt()","MET > 250"+ZL+dPhi+NJet+AverageM+DeltaM+Rmax, bad_lumi_filter, "Weight*30000", Jet3PT,
+  Plot("Btight","BLoose >= 2 && MET > 250"+dPhi+NJet+AverageM+DeltaM+Rmax, bad_lumi_filter, "Weight*30000", BT,
            "tree_signal", "tree_signalUnblind",
            "plotData:plotLog",
-           "New-Jet3PT-4b");
+           "New-Btight");
 
 /* 
   Plot("Rmax","MET > 250"+Rmax+AverageM+DeltaM+NJet, bad_lumi_filter, "Weight*30000", Rma,

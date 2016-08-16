@@ -23,11 +23,11 @@ double deltaR(double eta1, double phi1, double eta2, double phi2){
 
 void TreeMaker(TString filename) {
   gROOT->ProcessLine("#include <vector>");
-  TFile* file = TFile::Open(Form("root://cmseos.fnal.gov//store/user/lpcsusyhad/SusyRA2Analysis2015/Skims/Run2ProductionV9/tree_signal/%s", filename.Data()));
-//  TFile* file = TFile::Open("Total.root");
-  TTree* Tree = (TTree*)file->Get("tree");
-  TFile out(Form("/eos/uscms/store/user/adorsett/HHbbbb/BackTrees/%s",filename.Data()), "RECREATE");
- // TFile out("Signal.root","RECREATE");
+//  TFile* file = TFile::Open(Form("root://cmseos.fnal.gov//store/user/lpcsusyhad/SusyRA2Analysis2015/Skims/Run2ProductionV9/tree_signal/%s", filename.Data()));
+  TFile* file = TFile::Open("Total.root");
+  TTree* Tree = (TTree*)file->Get("TreeMaker2/PreSelection");
+//  TFile out(Form("/eos/uscms/store/user/adorsett/HHbbbb/BackTrees/%s",filename.Data()), "RECREATE");
+  TFile out("Signal.root","RECREATE");
   out.cd();
   Tree->SetBranchStatus("*",0);
   Tree->SetBranchStatus("RunNum",1);
@@ -126,6 +126,7 @@ void TreeMaker(TString filename) {
   double CSV1=0, CSV2=0, CSV3=0, CSV4=0;
   int config = 0;
   int MuonSize=0, ElectronSize=0;
+  Int_t Bloose=0, Bmedium=0, Btight=0;
   TLorentzVector pair1, pair2, empty(0.,0.,0.,0.);
 // Initialize output tree
   TTree *tree = new TTree("tree", "HHbbbb stats");
@@ -171,11 +172,17 @@ void TreeMaker(TString filename) {
   tree->Branch("LumiBlockNum", &Lumi);
   tree->Branch("Jets_ID", &JetsID);
   tree->Branch("Jets_bDiscriminatorCSV", &bDisc);
+  tree->Branch("Bloose", &Bloose);
+  tree->Branch("Bmedium", &Bmedium);
+  tree->Branch("Btight", &Btight);
 // Loop over Tree entries
   for(int i = 0; i < Tree->GetEntries(); i++) {
 	Tree->GetEntry(i);
 	jetcheck = 0;
 	jet20 = 0;
+	Bloose = 0;
+	Bmedium = 0;
+	Btight = 0;
 	CSV.clear();
 	jets.clear();
 	DeltaMjj = -1;
@@ -189,7 +196,10 @@ void TreeMaker(TString filename) {
 		 jets.push_back(0);  }
 	for(UInt_t j = 0; j < Jets->size(); j++) {
                 if(abs(Jets->at(j).Eta())<2.4 && Jets->at(j).Pt() > 30 && JetsID->at(j)) {
-			if(Jets->at(j).Pt() > 20) {jet20++;}
+			if(Jets->at(j).Pt() > 20) jet20++;
+			if(bDisc->at(j) > .970) Btight++;
+			if(bDisc->at(j) > .890) Bmedium++;
+			if(bDisc->at(j) > .605) Bloose++;
 			itC = CSV.begin();
 			itJ = jets.begin();
 			if(bDisc->at(j) > CSV.at(0)) {
@@ -269,8 +279,9 @@ void TreeMaker(TString filename) {
 
 void BigTree(){
 
-//  TreeMaker("WORDS");
+  TreeMaker("WORDS");
 
+/*
   TreeMaker("tree_ZZTo2Q2Nu.root");
   TreeMaker("tree_ZZTo2L2Q.root");
   TreeMaker("tree_ZJetsToNuNu_HT-100to200.root");
@@ -322,7 +333,7 @@ void BigTree(){
   TreeMaker("tree_DYJetsToLL_M-50_HT-400to600.root");
   TreeMaker("tree_DYJetsToLL_M-50_HT-200to400.root");
   TreeMaker("tree_DYJetsToLL_M-50_HT-100to200.root");
-
+*/
   return; }
 
 
